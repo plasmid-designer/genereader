@@ -1,0 +1,25 @@
+use crate::fasta::ast::{FastaFile, FastaSection};
+
+grammar;
+
+pub FastaFile: FastaFile = {
+    <sections:FastaSection*> => {
+        FastaFile {
+            sections,
+        }
+    }
+}
+
+pub FastaSection: FastaSection = {
+    <comments:Comment*> <desc:Description> <seq:Sequence+> => {
+        FastaSection {
+            comments,
+            desc,
+            seq,
+        }
+    }
+}
+
+Comment: String = <content:r";.*"> => content.to_string();
+Description: String = <content:r">.*"> => content.to_string();
+Sequence: String = <content:r"(?i)[ABCDEFGHIJKLMNOPQRSTUVWXYZ-]+[*]?"> => content.to_string();
