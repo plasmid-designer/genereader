@@ -1,4 +1,4 @@
-use crate::fasta::parser::FastaFileParser;
+use crate::fasta::lrparser::FastaFileParser;
 
 use super::FastaSection;
 

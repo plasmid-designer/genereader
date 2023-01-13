@@ -1,0 +1,43 @@
+// Whitespace
+WHITESPACE = _{ " " | "\t" }
+
+// Helpers
+not_newline = @{ !NEWLINE ~ ANY }
+any_till_nl = @{ not_newline* }
+
+// Sequence Definition
+sequence_header = @{ "@" ~ any_till_nl }
+sequence_line = @{ (ASCII_ALPHA | "-")+ }
+sequence_multiline = {
+	(sequence_line ~ NEWLINE ~ &sequence_line)*
+    ~ sequence_line
+}
+
+// Quality Definition
+quality_header = @{ "+" ~ any_till_nl }
+quality_line = @{ ('!'..'~')+ }
+quality_multiline = {
+	(quality_line ~ NEWLINE ~ !"@" ~ &quality_line)*
+    ~ quality_line
+}
+
+// Singleseq Definition
+singleseq_def = {
+	sequence_header
+    ~ NEWLINE
+    ~ sequence_multiline
+    ~ NEWLINE
+    ~ quality_header
+    ~ NEWLINE
+    ~ quality_multiline
+}
+
+// Multiseq Definition
+multiseq_def = {
+	(singleseq_def ~ NEWLINE+ ~ &singleseq_def)*
+    ~ singleseq_def
+}
+
+fastq = {
+	SOI ~ multiseq_def ~ NEWLINE* ~ EOI
+}
