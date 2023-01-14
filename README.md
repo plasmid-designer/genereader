@@ -1,8 +1,6 @@
 # genereader
 > A library to read, manipulate and write various genetic sequencing formats.
 
-Developed for use in [Plasmid Designer].
-
 ## About
 
 Genereader provides a universal interface for reading, manipulating and writing various genetic sequencing formats for use in [Plasmid Designer] and similar bioinformatics applications.
@@ -12,17 +10,15 @@ Genereader provides a universal interface for reading, manipulating and writing 
 2. Manipulate the contents of the file using a high-level interface
 3. Write the modified data back to disk
 
-Genereader tries to preserve the original formatting as well as _all_ metadata (such as annotations, etc.), but no explicit guarantees are made. Use at your own risk.
-
 ## Roadmap
 
 | Format             | Status |
 | ------------------ | ------ |
 | FASTA              | ✅     |
-| FASTQ              | TODO   |
+| FASTQ              | ✅     |
 | GB (GenBank)       | TODO   |
 | SAM                | TODO   |
-| Universal Inteface | TODO   |
+| Universal Inteface | WIP    |
 
 ## Contributing
 
