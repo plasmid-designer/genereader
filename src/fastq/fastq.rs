@@ -80,13 +80,13 @@ impl Fastq {
 
     fn parse_definition_sequence(sequence_multiline: Option<Pair<Rule>>) -> super::Result<String> {
         let pair = sequence_multiline.expect_some(Rule::sequence_multiline)?;
-        let sequence = pair.as_str().replace(['\r', '\n'], "").to_string();
+        let sequence = pair.as_str().replace(['\r', '\n'], "");
         Ok(sequence)
     }
 
     fn parse_definition_quality(quality_multiline: Option<Pair<Rule>>) -> super::Result<String> {
         let pair = quality_multiline.expect_some(Rule::quality_multiline)?;
-        let quality = pair.as_str().replace(['\r', '\n'], "").to_string();
+        let quality = pair.as_str().replace(['\r', '\n'], "");
         Ok(quality)
     }
 }

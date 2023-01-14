@@ -17,7 +17,7 @@ impl FastqSequence {
     }
 
     pub fn sequence_name(&self) -> &str {
-        &self.metadata.sequence_name()
+        self.metadata.sequence_name()
     }
 
     pub fn sequence_str(&self) -> &str {
