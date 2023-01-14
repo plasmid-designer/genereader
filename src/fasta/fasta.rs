@@ -1,7 +1,4 @@
-use pest::{
-    iterators::{Pair, Pairs},
-    Parser,
-};
+use pest::{iterators::Pair, Parser};
 
 use crate::{helper::*, FileFormat};
 
