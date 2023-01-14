@@ -1,3 +1,5 @@
+#![allow(clippy::module_inception)]
+
 mod error;
 mod fasta;
 mod fasta_metadata;

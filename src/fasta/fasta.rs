@@ -20,18 +20,20 @@ impl FileFormat for Fasta {
 impl Fasta {
     pub fn parse(source: &str) -> crate::Result<Self> {
         let root = FastaParser::parse(Rule::fasta, source)
-            .map_err(super::Error::FastaParseError)?
+            .map_err(|err| Box::new(super::Error::FastaParseError(err)))?
             .next()
-            .ok_or(super::Error::FastaCompileError {
-                expected: Rule::fasta,
-                actual: None,
+            .ok_or_else(|| {
+                Box::new(super::Error::FastaCompileError {
+                    expected: Rule::fasta,
+                    actual: None,
+                })
             })?;
         Ok(Self {
             sequences: Self::parse_root(root)?,
         })
     }
 
-    fn parse_root(root: Pair<Rule>) -> crate::Result<Vec<FastaSequence>> {
+    fn parse_root(root: Pair<Rule>) -> super::Result<Vec<FastaSequence>> {
         let mut sequences = Vec::new();
         let root = root.expect(Rule::fasta)?;
         for pair in root.into_inner() {

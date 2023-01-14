@@ -30,18 +30,20 @@ impl Fastq {
 impl Fastq {
     pub fn parse(source: &str) -> crate::Result<Self> {
         let root = FastqParser::parse(Rule::fastq, source)
-            .map_err(super::Error::FastaParseError)?
+            .map_err(|err| Box::new(super::Error::FastaParseError(err)))?
             .next()
-            .ok_or(super::Error::FastqCompileError {
-                expected: Rule::fastq,
-                actual: None,
+            .ok_or_else(|| {
+                Box::new(super::Error::FastqCompileError {
+                    expected: Rule::fastq,
+                    actual: None,
+                })
             })?;
         Ok(Self {
             sequences: Self::parse_root(root)?,
         })
     }
 
-    fn parse_root(root: Pair<Rule>) -> crate::Result<Vec<FastqSequence>> {
+    fn parse_root(root: Pair<Rule>) -> super::Result<Vec<FastqSequence>> {
         let mut sequences = Vec::new();
         let root = root.expect(Rule::fastq)?;
         for pair in root.into_inner() {
