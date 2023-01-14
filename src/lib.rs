@@ -4,7 +4,7 @@ mod fasta;
 mod fastq;
 mod helper;
 
-pub(crate) use helper::{PairExt, PairOptionExt, RuleExt};
+pub(crate) use helper::RuleExt;
 
 pub use api::*;
 pub use error::{Error, Result};

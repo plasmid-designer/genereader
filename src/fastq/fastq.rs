@@ -30,9 +30,9 @@ impl Fastq {
 impl Fastq {
     pub fn parse(source: &str) -> crate::Result<Self> {
         let root = FastqParser::parse(Rule::fastq, source)
-            .map_err(|err| super::Error::FastaParseError(err))?
+            .map_err(super::Error::FastaParseError)?
             .next()
-            .ok_or_else(|| super::Error::FastqCompileError {
+            .ok_or(super::Error::FastqCompileError {
                 expected: Rule::fastq,
                 actual: None,
             })?;

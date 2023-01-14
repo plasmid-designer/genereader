@@ -20,9 +20,9 @@ impl FileFormat for Fasta {
 impl Fasta {
     pub fn parse(source: &str) -> crate::Result<Self> {
         let root = FastaParser::parse(Rule::fasta, source)
-            .map_err(|err| super::Error::FastaParseError(err))?
+            .map_err(super::Error::FastaParseError)?
             .next()
-            .ok_or_else(|| super::Error::FastaCompileError {
+            .ok_or(super::Error::FastaCompileError {
                 expected: Rule::fasta,
                 actual: None,
             })?;
