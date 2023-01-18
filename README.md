@@ -12,13 +12,12 @@ Genereader provides a universal interface for reading, manipulating and writing 
 
 ## Roadmap
 
-| Format             | Status |
-| ------------------ | ------ |
-| FASTA              | ✅     |
-| FASTQ              | ✅     |
-| GB (GenBank)       | TODO   |
-| SAM                | TODO   |
-| Universal Inteface | WIP    |
+| Format              | Read | Write |
+| ------------------- | ---- | ----- |
+| FASTA               | ✅   | TODO  |
+| FASTQ               | ✅   | TODO  |
+| GB (GenBank)        | ✅   | TODO  |
+| SAM                 | TODO | TODO  |
 
 ## Contributing
 
