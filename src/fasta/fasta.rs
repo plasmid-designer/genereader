@@ -18,16 +18,27 @@ impl FileFormat for Fasta {
 }
 
 impl Fasta {
+    pub fn sequences_iter(&self) -> impl Iterator<Item = &FastaSequence> {
+        self.sequences.iter()
+    }
+
+    pub fn sequences_into_iter(self) -> impl Iterator<Item = FastaSequence> {
+        self.sequences.into_iter()
+    }
+}
+
+impl Fasta {
     pub fn parse(source: &str) -> crate::Result<Self> {
-        let root = FastaParser::parse(Rule::fasta, source)
+        let root = FastaParser::parse(Rule::root, source)
             .map_err(|err| Box::new(super::Error::FastaParseError(err)))?
             .next()
             .ok_or_else(|| {
                 Box::new(super::Error::FastaCompileError {
-                    expected: Some(Rule::fasta),
+                    expected: Some(Rule::root),
                     actual: None,
                 })
             })?;
+
         Ok(Self {
             sequences: Self::parse_root(root)?,
         })
@@ -35,7 +46,7 @@ impl Fasta {
 
     fn parse_root(root: Pair<Rule>) -> super::Result<Vec<FastaSequence>> {
         let mut sequences = Vec::new();
-        let root = root.expect(Rule::fasta)?;
+
         for pair in root.into_inner() {
             match pair.as_rule() {
                 Rule::multiseq_def => {
@@ -47,6 +58,7 @@ impl Fasta {
                 _ => unreachable!(),
             }
         }
+
         Ok(sequences)
     }
 
@@ -56,6 +68,7 @@ impl Fasta {
 
         let metadata = Self::parse_definition_metadata(pairs.next())?;
         let sequence = Self::parse_definition_sequence(pairs.next())?;
+        pairs.next().expect_none()?;
 
         Ok(FastaSequence::new(metadata, sequence))
     }
@@ -65,12 +78,14 @@ impl Fasta {
     ) -> super::Result<FastaMetadata> {
         let pair = sequence_header.expect_some(Rule::sequence_header)?;
         let sequence_header = pair.as_str().trim_start_matches('>').to_string();
+
         Ok(FastaMetadata::new(sequence_header))
     }
 
     fn parse_definition_sequence(sequence_multiline: Option<Pair<Rule>>) -> super::Result<String> {
         let pair = sequence_multiline.expect_some(Rule::sequence_multiline)?;
         let sequence = pair.as_str().replace(['\r', '\n'], "");
+
         Ok(sequence)
     }
 }

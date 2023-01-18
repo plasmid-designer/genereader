@@ -38,6 +38,6 @@ multiseq_def = {
     ~ singleseq_def
 }
 
-fastq = {
+root = {
 	SOI ~ multiseq_def ~ NEWLINE* ~ EOI
 }

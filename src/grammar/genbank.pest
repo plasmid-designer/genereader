@@ -74,8 +74,8 @@ origin_line = { WHITESPACE* ~ origin_line_number ~ (origin_line_sequence ~ &NEWL
     origin_line_sequence = @{ (origin_line_sequence_block ~ WHITESPACE*)+ }
 origin_block = { origin_id ~ NEWLINE ~ (origin_line ~ NEWLINE)+ }
 
-genbank = {
-	SOI
+root = {
+    SOI
     ~ metadata_table
     ~ feature_table
     ~ origin_block

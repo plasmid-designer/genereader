@@ -23,12 +23,12 @@ impl FileFormat for Genbank {
 
 impl Genbank {
     pub fn parse(source: &str) -> crate::Result<Self> {
-        let root = GenbankParser::parse(Rule::genbank, source)
+        let root = GenbankParser::parse(Rule::root, source)
             .map_err(|err| Box::new(super::Error::GenbankParseError(err)))?
             .next()
             .ok_or_else(|| {
                 Box::new(super::Error::GenbankCompileError {
-                    expected: Some(Rule::genbank),
+                    expected: Some(Rule::root),
                     actual: None,
                 })
             })?;
@@ -38,14 +38,18 @@ impl Genbank {
     }
 
     fn parse_root(root: Pair<Rule>) -> super::Result<GenbankSequence> {
-        let root = root.expect(Rule::genbank)?;
         let mut root_iter = root.into_inner();
+
         let metadata_table = Self::parse_metadata_table(root_iter.next())?;
         let feature_table = Self::parse_feature_table(root_iter.next())?;
         let origin_sequence = Self::parse_origin_sequence(root_iter.next())?;
         root_iter.next().expect_some(Rule::EOI)?;
-        let sequence = GenbankSequence::new(metadata_table, feature_table, origin_sequence);
-        Ok(sequence)
+
+        Ok(GenbankSequence::new(
+            metadata_table,
+            feature_table,
+            origin_sequence,
+        ))
     }
 
     fn parse_metadata_table(
@@ -53,9 +57,11 @@ impl Genbank {
     ) -> super::Result<GenbankMetadataTable> {
         let mut metadata_table_map = GenbankMetadataTable::default();
         let metadata_table = metadata_table.expect_some(Rule::metadata_table)?;
+
         for pair in metadata_table.into_inner() {
             let metadata_entry = pair.expect(Rule::metadata_entry)?;
             let mut metadata_entry_iter = metadata_entry.into_inner();
+
             let key = metadata_entry_iter
                 .next()
                 .expect_some(Rule::metadata_key)?
@@ -64,9 +70,11 @@ impl Genbank {
                 .next()
                 .expect_some(Rule::metadata_value)?
                 .as_str();
+
             metadata_entry_iter.next().expect_none()?;
             metadata_table_map.insert(key.into(), value.into());
         }
+
         Ok(metadata_table_map)
     }
 
@@ -75,11 +83,13 @@ impl Genbank {
     ) -> super::Result<GenbankFeatureTable> {
         let feature_table = feature_table.expect_some(Rule::feature_table)?;
         let mut features = Vec::new();
+
         for pair in feature_table.into_inner() {
             let feature_entry = pair.expect(Rule::feature_table_entry)?;
             let feature = Self::parse_feature_table_entry(feature_entry)?;
             features.push(feature);
         }
+
         Ok(GenbankFeatureTable::new(features))
     }
 
@@ -101,6 +111,7 @@ impl Genbank {
             Self::parse_feature_table_entry_qualifiers(feature_table_entry_iter.next())?;
         let feature = GenbankFeature::new(key.into(), location.into(), qualifiers);
         feature_table_entry_iter.next().expect_none()?;
+
         Ok(feature)
     }
 
@@ -109,6 +120,7 @@ impl Genbank {
     ) -> super::Result<Vec<GenbankFeatureQualifier>> {
         let mut qualifiers = Vec::new();
         let qualifier_list = qualifier_list.expect_some(Rule::qualifier_list)?;
+
         for pair in qualifier_list.into_inner() {
             let qualifier_entry = pair.expect(Rule::qualifier_entry)?;
             let mut qualifier_iter = qualifier_entry.into_inner();
@@ -122,16 +134,20 @@ impl Genbank {
                 .expect_some(Rule::qualifier_value)?
                 .as_str()
                 .trim_matches('"');
-            let qualifier =
-                GenbankFeatureQualifier::new(qualifier_key.into(), qualifier_value.into());
-            qualifiers.push(qualifier);
+
+            qualifiers.push(GenbankFeatureQualifier::new(
+                qualifier_key.into(),
+                qualifier_value.into(),
+            ));
         }
+
         Ok(qualifiers)
     }
 
     fn parse_origin_sequence(origin_sequence: Option<Pair<Rule>>) -> super::Result<String> {
         let origin_sequence = origin_sequence.expect_some(Rule::origin_block)?;
         let mut final_sequence = String::new();
+
         for pair in origin_sequence.into_inner() {
             let origin_line = pair.expect(Rule::origin_line)?;
             let mut origin_line_iter = origin_line.into_inner();
@@ -145,6 +161,7 @@ impl Genbank {
                 .replace(char::is_whitespace, "");
             final_sequence.push_str(&origin_line_sequence);
         }
+
         Ok(final_sequence)
     }
 }

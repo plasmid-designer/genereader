@@ -23,6 +23,7 @@ multiseq_def = {
 	(singleseq_def ~ NEWLINE+ ~ &singleseq_def)*
     ~ singleseq_def
 }
-fasta = {
+
+root = {
 	SOI ~ multiseq_def ~ NEWLINE* ~ EOI
 }

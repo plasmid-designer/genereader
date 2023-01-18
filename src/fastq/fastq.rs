@@ -29,15 +29,16 @@ impl Fastq {
 
 impl Fastq {
     pub fn parse(source: &str) -> crate::Result<Self> {
-        let root = FastqParser::parse(Rule::fastq, source)
+        let root = FastqParser::parse(Rule::root, source)
             .map_err(|err| Box::new(super::Error::FastaParseError(err)))?
             .next()
             .ok_or_else(|| {
                 Box::new(super::Error::FastqCompileError {
-                    expected: Some(Rule::fastq),
+                    expected: Some(Rule::root),
                     actual: None,
                 })
             })?;
+
         Ok(Self {
             sequences: Self::parse_root(root)?,
         })
@@ -45,7 +46,7 @@ impl Fastq {
 
     fn parse_root(root: Pair<Rule>) -> super::Result<Vec<FastqSequence>> {
         let mut sequences = Vec::new();
-        let root = root.expect(Rule::fastq)?;
+
         for pair in root.into_inner() {
             match pair.as_rule() {
                 Rule::multiseq_def => {
@@ -57,6 +58,7 @@ impl Fastq {
                 _ => unreachable!(),
             }
         }
+
         Ok(sequences)
     }
 
@@ -68,6 +70,7 @@ impl Fastq {
         let sequence = Self::parse_definition_sequence(pairs.next())?;
         let _quality_header = pairs.next().expect_some(Rule::quality_header)?;
         let quality = Self::parse_definition_quality(pairs.next())?;
+        pairs.next().expect_none()?;
 
         Ok(FastqSequence::new(metadata, sequence, quality))
     }
@@ -77,18 +80,21 @@ impl Fastq {
     ) -> super::Result<FastqMetadata> {
         let pair = sequence_header.expect_some(Rule::sequence_header)?;
         let sequence_header = pair.as_str().trim_start_matches('@').to_string();
+
         Ok(FastqMetadata::new(sequence_header))
     }
 
     fn parse_definition_sequence(sequence_multiline: Option<Pair<Rule>>) -> super::Result<String> {
         let pair = sequence_multiline.expect_some(Rule::sequence_multiline)?;
         let sequence = pair.as_str().replace(['\r', '\n'], "");
+
         Ok(sequence)
     }
 
     fn parse_definition_quality(quality_multiline: Option<Pair<Rule>>) -> super::Result<String> {
         let pair = quality_multiline.expect_some(Rule::quality_multiline)?;
         let quality = pair.as_str().replace(['\r', '\n'], "");
+
         Ok(quality)
     }
 }
