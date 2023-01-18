@@ -6,15 +6,17 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [features]
-default = ["fastq", "fasta"]
+default = ["fastq", "fasta", "genbank"]
 fasta = []
 fastq = []
+genbank = []
 
 [dependencies]
 regex = "1.7.0"
 thiserror = "1.0.38"
 pest_derive = "2.5.2"
 pest = "2.5.2"
+indexmap = "1.9.2"
 
 [dev-dependencies]
 indoc = "1.0.8"

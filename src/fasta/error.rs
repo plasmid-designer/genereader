@@ -6,7 +6,7 @@ pub enum Error {
     FastaParseError(#[from] FastaParseError),
     #[error("FASTA compilation error: Expected {expected:?}; Actual: {actual:?}")]
     FastaCompileError {
-        expected: super::Rule,
+        expected: Option<super::Rule>,
         actual: Option<super::Rule>,
     },
 }

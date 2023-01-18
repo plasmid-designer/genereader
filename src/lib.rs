@@ -20,7 +20,7 @@ pub use error::{Error, Result};
 //
 
 #[cfg(feature = "fasta")]
-mod fasta;
+pub mod fasta;
 
 #[cfg(feature = "fasta")]
 pub use fasta::Fasta;
@@ -31,7 +31,18 @@ pub use fasta::Fasta;
 //
 
 #[cfg(feature = "fastq")]
-mod fastq;
+pub mod fastq;
 
 #[cfg(feature = "fastq")]
 pub use fastq::Fastq;
+
+//
+// Public exports
+// Feature: genbank
+//
+
+#[cfg(feature = "genbank")]
+pub mod genbank;
+
+#[cfg(feature = "genbank")]
+pub use genbank::Genbank;

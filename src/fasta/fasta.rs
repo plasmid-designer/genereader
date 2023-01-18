@@ -24,7 +24,7 @@ impl Fasta {
             .next()
             .ok_or_else(|| {
                 Box::new(super::Error::FastaCompileError {
-                    expected: Rule::fasta,
+                    expected: Some(Rule::fasta),
                     actual: None,
                 })
             })?;

@@ -6,7 +6,7 @@ pub enum Error {
     FastaParseError(#[from] FastqParseError),
     #[error("FASTQ compilation error: Expected {expected:?}; Actual: {actual:?}")]
     FastqCompileError {
-        expected: super::Rule,
+        expected: Option<super::Rule>,
         actual: Option<super::Rule>,
     },
 }

@@ -7,7 +7,7 @@ pub struct FastqParser;
 impl crate::RuleExt for Rule {
     type ERROR = super::Error;
 
-    fn to_error(expected: Self, actual: Option<Self>) -> Self::ERROR {
+    fn to_error(expected: Option<Self>, actual: Option<Self>) -> Self::ERROR {
         super::Error::FastqCompileError { expected, actual }
     }
 }

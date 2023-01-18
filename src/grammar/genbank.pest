@@ -1,0 +1,84 @@
+// Whitespace
+WHITESPACE = _{ " " | "\t" }
+WHITESPACE_NL = _{ WHITESPACE | NEWLINE }
+
+// Helpers
+not_newline = _{ !NEWLINE ~ ANY }
+any_till_nl = _{ not_newline* }
+file_terminator = _{ WHITESPACE_NL* ~ "//" ~ WHITESPACE_NL* }
+
+// Metadata Table
+metadata_key = @{ ASCII_ALPHA_UPPER+ }
+	metadata_key_preamble = _{ (SOI | NEWLINE) ~ WHITESPACE* }
+metadata_value = @{ metadata_value_sameline ~ metadata_value_nextline* }
+    metadata_value_sameline = @{ any_till_nl }
+    metadata_value_nextline = @{
+        !(metadata_key_preamble ~ metadata_key) ~
+        (NEWLINE ~ WHITESPACE*) ~
+        any_till_nl
+    }
+metadata_entry = {
+    metadata_key_preamble
+    ~ metadata_key
+    ~ metadata_value
+}
+metadata_terminator = @{ NEWLINE ~ (feature_table_id | origin_id) }
+metadata_table = {
+	(!metadata_terminator ~ metadata_entry)+
+    ~ NEWLINE
+}
+
+// Feature Table
+// Spec: https://www.insdc.org/submitting-standards/feature-table
+feature_table_id = _{ "FEATURES" }
+feature_key = @{ (ASCII_ALPHA | ASCII_DIGIT | "_" | "-" | "'" | "*"){1,15} }
+feature_value = @{ feature_value_location | feature_value_operator }
+    feature_value_location_simple = @{ ASCII_DIGIT+ }
+    feature_value_location_remote = @{ (ASCII_ALPHA_UPPER | ASCII_DIGIT | ".")+ ~ ":" ~ ASCII_DIGIT+ }
+    feature_value_location_either = @{ feature_value_location_simple | feature_value_location_remote }
+    feature_value_location = @{
+        ("<"? ~ feature_value_location_either)
+        ~ ("<"? ~ ".." ~ ">"?)
+        ~ (feature_value_location_either ~ ">"?)
+    }
+    feature_value_location_list = @{
+        "(" ~ (feature_value_location | feature_value_operator)
+        ~ ("," ~ (feature_value_location | feature_value_operator))+ ~ ")"
+    }
+    feature_value_operator = @{
+        ("complement" ~ "(" ~ (feature_value_location | feature_value_operator) ~ ")")
+        | (("join" | "order") ~ feature_value_location_list)
+    }
+feature_key_value = ${ feature_key ~ WHITESPACE+ ~ feature_value }
+qualifier = _{ qualifier_key ~ "=" ~ qualifier_value }
+    qualifier_key = @{ "/" ~ (ASCII_ALPHA | ASCII_DIGIT | "_" | "-" | "'" | "*"){1,20} }
+    qualifier_value_delimited = @{ "\"" ~ (!"\"" ~ ANY)* ~ "\"" }
+    qualifier_value_freestanding = @{ (!NEWLINE ~ ANY)+ }
+    qualifier_value = @{ qualifier_value_delimited | qualifier_value_freestanding }
+qualifier_entry = ${ WHITESPACE* ~ qualifier ~ (NEWLINE | EOI) }
+qualifier_list = ${ qualifier_entry+ }
+feature_table_entry = {
+	(feature_key_value ~ NEWLINE)
+    ~ qualifier_list?
+}
+feature_table = {
+    (feature_table_id ~ any_till_nl ~ NEWLINE)
+    ~ feature_table_entry+
+}
+
+// Origin
+origin_id = _{ "ORIGIN" }
+origin_line = { WHITESPACE* ~ origin_line_number ~ (origin_line_sequence ~ &NEWLINE)+ }
+    origin_line_number = @{ ASCII_DIGIT+ }
+    origin_line_sequence_block = @{ ASCII_ALPHA+ }
+    origin_line_sequence = @{ (origin_line_sequence_block ~ WHITESPACE*)+ }
+origin_block = { origin_id ~ NEWLINE ~ (origin_line ~ NEWLINE)+ }
+
+genbank = {
+	SOI
+    ~ metadata_table
+    ~ feature_table
+    ~ origin_block
+    ~ file_terminator
+    ~ EOI
+}

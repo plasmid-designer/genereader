@@ -34,7 +34,7 @@ impl Fastq {
             .next()
             .ok_or_else(|| {
                 Box::new(super::Error::FastqCompileError {
-                    expected: Rule::fastq,
+                    expected: Some(Rule::fastq),
                     actual: None,
                 })
             })?;
